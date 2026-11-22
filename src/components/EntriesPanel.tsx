@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import {
-  colorForIndex,
   DEFAULT_ENTRIES,
+  gradientCss,
+  gradientForIndex,
   MAX_ENTRIES,
   MIN_ENTRIES,
   type Entry,
@@ -89,7 +90,9 @@ export default function EntriesPanel({
           <li className="entry" key={entry.id}>
             <span
               className="dot"
-              style={{ background: colorForIndex(index).hex }}
+              style={{
+                background: gradientCss(gradientForIndex(index).stops),
+              }}
               aria-hidden="true"
             />
             <input

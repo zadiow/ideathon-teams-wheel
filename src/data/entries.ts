@@ -3,49 +3,48 @@ export type Entry = {
   label: string
 }
 
+export type WheelGradient = {
+  name: string
+  stops: readonly string[]
+  text: string
+}
+
 export const MIN_ENTRIES = 2
 export const MAX_ENTRIES = 12
-
-/**
- * Palette sampled from the NextGen brand color swatches.
- * Keep this order: the wheel assigns colors by index.
- */
-export const PALETTE = [
-  { name: 'Violet', hex: '#6A5EED' },
-  { name: 'Orange', hex: '#FFA333' },
-  { name: 'Blue', hex: '#25B6F3' },
-  { name: 'Pink', hex: '#D912D9' },
-  { name: 'Green', hex: '#00FF7F' },
-  { name: 'Red', hex: '#FB4B4E' },
-  { name: 'Yellow', hex: '#FFD819' },
-  { name: 'Neutral', hex: '#A7ADBE' },
-] as const
 
 const INK = '#2B2F3B'
 const WHITE = '#FFFFFF'
 
-export function colorForIndex(index: number) {
-  return PALETTE[index % PALETTE.length]
+/**
+ * Gradient recipes sampled from the NextGen "Gradients" sheet.
+ * The wheel cycles through these in order so neighbouring wedges stay distinct.
+ */
+export const WHEEL_GRADIENTS: readonly WheelGradient[] = [
+  { name: 'Pink → Red', stops: ['#D912D9', '#FB4B4E'], text: WHITE },
+  { name: 'Blue → Violet', stops: ['#25B6F3', '#6A5EED'], text: WHITE },
+  {
+    name: 'Orange → Red → Pink',
+    stops: ['#FFA333', '#FB4B4E', '#D912D9'],
+    text: INK,
+  },
+  { name: 'Light Blue → Violet', stops: ['#E9F8FE', '#F0F0FD'], text: INK },
+  { name: 'Red → Orange', stops: ['#FB4B4E', '#FFA333'], text: INK },
+  {
+    name: 'Pink → Violet → Blue',
+    stops: ['#C91DDB', '#6A5EED', '#30A9F2'],
+    text: WHITE,
+  },
+  { name: 'Light Red → Pink', stops: ['#FEEBED', '#FAD9F8'], text: INK },
+  { name: 'Violet → Blue', stops: ['#6A5EED', '#30A9F2'], text: WHITE },
+]
+
+export function gradientForIndex(index: number) {
+  return WHEEL_GRADIENTS[index % WHEEL_GRADIENTS.length]
 }
 
-function linearChannel(value: number) {
-  const channel = value / 255
-  return channel <= 0.03928
-    ? channel / 12.92
-    : ((channel + 0.055) / 1.055) ** 2.4
-}
-
-/** Pick ink or white text based on the swatch's relative luminance. */
-export function textColorFor(hex: string) {
-  const red = Number.parseInt(hex.slice(1, 3), 16)
-  const green = Number.parseInt(hex.slice(3, 5), 16)
-  const blue = Number.parseInt(hex.slice(5, 7), 16)
-  const luminance =
-    0.2126 * linearChannel(red) +
-    0.7152 * linearChannel(green) +
-    0.0722 * linearChannel(blue)
-
-  return luminance > 0.36 ? INK : WHITE
+/** CSS gradient for the entry dots in the side panel. */
+export function gradientCss(stops: readonly string[], angle = 135) {
+  return `linear-gradient(${angle}deg, ${stops.join(', ')})`
 }
 
 export const DEFAULT_ENTRIES: Entry[] = [

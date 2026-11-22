@@ -32,7 +32,7 @@ src/
     Wheel.tsx      SVG wheel, pointer, and spin button
     EntriesPanel.tsx  Editable entry list, shuffle, reset
     ResultDialog.tsx  Winner modal
-  data/entries.ts  Default entries, palette, contrast helper
+  data/entries.ts  Default entries, brand gradient recipes, helpers
   App.tsx          Spin state, rotation math, persistence
   index.css        Design tokens and global styles
   App.css          Page layout
@@ -41,7 +41,9 @@ Logo/              Brand logo source files (tracked)
 
 ## Brand
 
-The palette was sampled from the supplied color swatches:
+The wheel cycles through gradient recipes from the supplied **Gradients** sheet
+(pink → red, blue → violet, the light variants, and the triple-stop blends),
+with colors sampled from the swatch set:
 
 | Color   | Hex       |
 | ------- | --------- |
