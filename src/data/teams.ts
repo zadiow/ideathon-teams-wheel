@@ -66,7 +66,6 @@ const DEFAULT_TEAM_NAMES = [
   'NEWGEN',
   'SOLVIHA',
   'VORTEX',
-  'TAWAT',
   "SALAMANCA'S",
   'FLUORINE',
   'HAT TRICK',
