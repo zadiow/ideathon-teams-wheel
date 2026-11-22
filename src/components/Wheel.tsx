@@ -1,8 +1,8 @@
-import { gradientForIndex, type Entry } from '../data/entries'
+import { gradientForIndex, type Team } from '../data/teams'
 import './Wheel.css'
 
 type WheelProps = {
-  entries: Entry[]
+  teams: Team[]
   rotation: number
   spinning: boolean
   onSpin: () => void
@@ -56,30 +56,35 @@ function fitLabel(label: string, maxLength: number) {
 }
 
 export default function Wheel({
-  entries,
+  teams,
   rotation,
   spinning,
   onSpin,
   onSpinEnd,
 }: WheelProps) {
-  const segmentAngle = 360 / entries.length
-  const maxLabelLength = entries.length <= 4 ? 16 : entries.length <= 8 ? 13 : 10
-  const labelSize = entries.length <= 4 ? 8 : entries.length <= 8 ? 6.6 : 5.4
+  const count = teams.length
+  const segmentAngle = count > 0 ? 360 / count : 360
+  const useRadialLabels = count > 12
+  const maxLabelLength =
+    count <= 4 ? 16 : count <= 8 ? 13 : count <= 12 ? 10 : 12
+  const labelSize = count <= 4 ? 8 : count <= 8 ? 6.6 : count <= 12 ? 5.4 : 5.1
   const labelPadding = Math.min(2.5, segmentAngle * 0.06)
+  const canSpin = count >= 2 && !spinning
 
-  const segments = entries.map((entry, index) => {
+  const segments = teams.map((team, index) => {
     const start = index * segmentAngle - 90
     const end = start + segmentAngle
     const mid = start + segmentAngle / 2
     const gradient = gradientForIndex(index)
 
     return {
-      entry,
+      team,
       index,
       start,
       end,
       mid,
       gradient,
+      flip: mid > 90 && mid < 270,
       reversed: mid > 0 && mid < 180,
       from: polar(RADIUS, start),
       to: polar(RADIUS, end),
@@ -90,6 +95,14 @@ export default function Wheel({
       ),
     }
   })
+
+  const caption = spinning
+    ? 'Round and round…'
+    : count === 1
+      ? `${teams[0].label.trim() || 'One team'} is the last team standing.`
+      : count === 0
+        ? 'Add teams to get started.'
+        : 'Tap SPIN to send one team home.'
 
   return (
     <div className="wheel-wrap">
@@ -110,7 +123,7 @@ export default function Wheel({
             className="wheel-svg"
             viewBox={`0 0 ${SIZE} ${SIZE}`}
             role="img"
-            aria-label={`Wheel with ${entries.length} options`}
+            aria-label={`Wheel with ${count} teams`}
           >
             <defs>
               <radialGradient id="wheel-hub" cx="50%" cy="38%" r="72%">
@@ -122,48 +135,71 @@ export default function Wheel({
                 <stop offset="100%" stopColor="#2B2F3B" stopOpacity="0.12" />
               </radialGradient>
 
-              {segments.map(({ index, gradient, from, to }) => (
-                <linearGradient
-                  key={`gradient-${index}`}
-                  id={`segment-gradient-${index}`}
-                  gradientUnits="userSpaceOnUse"
-                  x1={from.x}
-                  y1={from.y}
-                  x2={to.x}
-                  y2={to.y}
-                >
-                  {gradient.stops.map((stop, stopIndex) => (
+              {count === 1 ? (
+                <linearGradient id="solo-gradient" x1="0" y1="0" x2="1" y2="1">
+                  {segments[0].gradient.stops.map((stop, stopIndex) => (
                     <stop
                       key={stop}
-                      offset={`${(stopIndex / (gradient.stops.length - 1)) * 100}%`}
+                      offset={`${(stopIndex / (segments[0].gradient.stops.length - 1)) * 100}%`}
                       stopColor={stop}
                     />
                   ))}
                 </linearGradient>
-              ))}
+              ) : (
+                segments.map(({ index, gradient, from, to }) => (
+                  <linearGradient
+                    key={`gradient-${index}`}
+                    id={`segment-gradient-${index}`}
+                    gradientUnits="userSpaceOnUse"
+                    x1={from.x}
+                    y1={from.y}
+                    x2={to.x}
+                    y2={to.y}
+                  >
+                    {gradient.stops.map((stop, stopIndex) => (
+                      <stop
+                        key={stop}
+                        offset={`${(stopIndex / (gradient.stops.length - 1)) * 100}%`}
+                        stopColor={stop}
+                      />
+                    ))}
+                  </linearGradient>
+                ))
+              )}
 
-              {segments.map(({ index, labelPath }) => (
-                <path
-                  key={`label-path-${index}`}
-                  id={`label-path-${index}`}
-                  d={labelPath}
-                  fill="none"
-                />
-              ))}
+              {!useRadialLabels && count > 1
+                ? segments.map(({ index, labelPath }) => (
+                    <path
+                      key={`label-path-${index}`}
+                      id={`label-path-${index}`}
+                      d={labelPath}
+                      fill="none"
+                    />
+                  ))
+                : null}
             </defs>
 
             <circle cx={CENTER} cy={CENTER} r={99} fill="#FFFFFF" />
 
-            {segments.map(({ entry, index, start, end }) => (
-              <path
-                key={entry.id}
-                d={segmentPath(start, end)}
-                fill={`url(#segment-gradient-${index})`}
-                stroke="#FFFFFF"
-                strokeWidth="0.8"
-                strokeLinejoin="round"
+            {count === 1 ? (
+              <circle
+                cx={CENTER}
+                cy={CENTER}
+                r={RADIUS}
+                fill="url(#solo-gradient)"
               />
-            ))}
+            ) : (
+              segments.map(({ team, index, start, end }) => (
+                <path
+                  key={team.id}
+                  d={segmentPath(start, end)}
+                  fill={`url(#segment-gradient-${index})`}
+                  stroke="#FFFFFF"
+                  strokeWidth={count > 16 ? 0.6 : 0.8}
+                  strokeLinejoin="round"
+                />
+              ))
+            )}
 
             <circle
               cx={CENTER}
@@ -173,28 +209,74 @@ export default function Wheel({
               pointerEvents="none"
             />
 
-            {segments.map(({ entry, index, gradient }) => (
+            {count === 1 ? (
               <text
-                key={entry.id}
-                fill={gradient.text}
-                stroke={
-                  gradient.text === '#FFFFFF'
-                    ? 'rgba(43, 47, 59, 0.18)'
-                    : 'none'
-                }
-                strokeWidth={gradient.text === '#FFFFFF' ? 0.7 : 0}
-                paintOrder="stroke"
-                fontSize={labelSize}
-                fontWeight="700"
-                letterSpacing="0.02em"
+                x={CENTER}
+                y={58}
                 textAnchor="middle"
                 dominantBaseline="middle"
+                fill={segments[0].gradient.text}
+                stroke="rgba(43, 47, 59, 0.18)"
+                strokeWidth="0.7"
+                paintOrder="stroke"
+                fontSize="8"
+                fontWeight="700"
+                letterSpacing="0.04em"
               >
-                <textPath href={`#label-path-${index}`} startOffset="50%">
-                  {fitLabel(entry.label, maxLabelLength).toUpperCase()}
-                </textPath>
+                {fitLabel(teams[0].label, 16).toUpperCase()}
               </text>
-            ))}
+            ) : useRadialLabels ? (
+              segments.map(({ team, mid, gradient, flip }) => (
+                <g
+                  key={team.id}
+                  transform={`translate(${CENTER} ${CENTER}) rotate(${mid})`}
+                >
+                  <text
+                    x={88}
+                    y={0}
+                    textAnchor={flip ? 'start' : 'end'}
+                    transform={flip ? 'rotate(180 88 0)' : undefined}
+                    dominantBaseline="middle"
+                    fill={gradient.text}
+                    stroke={
+                      gradient.text === '#FFFFFF'
+                        ? 'rgba(43, 47, 59, 0.18)'
+                        : 'none'
+                    }
+                    strokeWidth={gradient.text === '#FFFFFF' ? 0.6 : 0}
+                    paintOrder="stroke"
+                    fontSize={labelSize}
+                    fontWeight="700"
+                    letterSpacing="0.02em"
+                  >
+                    {fitLabel(team.label, maxLabelLength).toUpperCase()}
+                  </text>
+                </g>
+              ))
+            ) : (
+              segments.map(({ team, index, gradient }) => (
+                <text
+                  key={team.id}
+                  fill={gradient.text}
+                  stroke={
+                    gradient.text === '#FFFFFF'
+                      ? 'rgba(43, 47, 59, 0.18)'
+                      : 'none'
+                  }
+                  strokeWidth={gradient.text === '#FFFFFF' ? 0.7 : 0}
+                  paintOrder="stroke"
+                  fontSize={labelSize}
+                  fontWeight="700"
+                  letterSpacing="0.02em"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                >
+                  <textPath href={`#label-path-${index}`} startOffset="50%">
+                    {fitLabel(team.label, maxLabelLength).toUpperCase()}
+                  </textPath>
+                </text>
+              ))
+            )}
 
             <circle
               cx={CENTER}
@@ -211,15 +293,21 @@ export default function Wheel({
           type="button"
           className="spin-btn"
           onClick={onSpin}
-          disabled={spinning}
-          aria-label={spinning ? 'Wheel is spinning' : 'Spin the wheel'}
+          disabled={!canSpin}
+          aria-label={
+            spinning
+              ? 'Wheel is spinning'
+              : count < 2
+                ? 'Add at least two teams to spin'
+                : 'Spin the wheel'
+          }
         >
-          {spinning ? '…' : 'Spin'}
+          {spinning ? '…' : count === 1 ? 'Winner' : 'Spin'}
         </button>
       </div>
 
       <p className="wheel-caption" aria-live="polite">
-        {spinning ? 'Round and round…' : 'Tap SPIN and let fate decide.'}
+        {caption}
       </p>
     </div>
   )

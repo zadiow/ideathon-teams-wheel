@@ -1,9 +1,10 @@
 # Spin the Wheel
 
-A NextGen-branded spin-the-wheel app built with Vite, React, and TypeScript.
+A NextGen-branded elimination wheel built with Vite, React, and TypeScript.
 
-Eight colorful options, an editable list, and one very decisive wheel. Entries
-are saved to `localStorage`, so the wheel remembers your list between visits.
+25 placeholder teams start on the wheel. Every spin picks a winner and removes
+that team from the roster; the last team standing is the champion. The roster is
+saved to `localStorage`, so it survives reloads.
 
 ## Quick start
 
@@ -30,14 +31,20 @@ public/
 src/
   components/
     Wheel.tsx      SVG wheel, pointer, and spin button
-    EntriesPanel.tsx  Editable entry list, shuffle, reset
+    TeamsPanel.tsx    Editable team roster, shuffle, reset
     ResultDialog.tsx  Winner modal
-  data/entries.ts  Default entries, brand gradient recipes, helpers
+  data/teams.ts    Default teams, brand gradient recipes, helpers
   App.tsx          Spin state, rotation math, persistence
   index.css        Design tokens and global styles
   App.css          Page layout
 Logo/              Brand logo source files (tracked)
 ```
+
+## Team roster
+
+Edit team names inline, add up to 32 teams, shuffle the order, or reset to the
+25 placeholders. The default roster lives in `src/data/teams.ts` — swap the
+placeholder labels there for the real team names when they are ready.
 
 ## Brand
 

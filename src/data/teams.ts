@@ -1,4 +1,4 @@
-export type Entry = {
+export type Team = {
   id: string
   label: string
 }
@@ -9,8 +9,8 @@ export type WheelGradient = {
   text: string
 }
 
-export const MIN_ENTRIES = 2
-export const MAX_ENTRIES = 12
+export const MIN_TEAMS = 1
+export const MAX_TEAMS = 32
 
 const INK = '#2B2F3B'
 const WHITE = '#FFFFFF'
@@ -42,18 +42,20 @@ export function gradientForIndex(index: number) {
   return WHEEL_GRADIENTS[index % WHEEL_GRADIENTS.length]
 }
 
-/** CSS gradient for the entry dots in the side panel. */
+/** CSS gradient for the team dots in the side panel. */
 export function gradientCss(stops: readonly string[], angle = 135) {
   return `linear-gradient(${angle}deg, ${stops.join(', ')})`
 }
 
-export const DEFAULT_ENTRIES: Entry[] = [
-  { id: 'ship-it', label: 'Ship it' },
-  { id: 'coffee-run', label: 'Coffee run' },
-  { id: 'pizza-party', label: 'Pizza party' },
-  { id: 'design-sprint', label: 'Design sprint' },
-  { id: 'demo-day', label: 'Demo day' },
-  { id: 'bug-bash', label: 'Bug bash' },
-  { id: 'team-retro', label: 'Team retro' },
-  { id: 'wildcard', label: 'Wildcard' },
-]
+// Placeholder roster — replace these labels with the real team names when ready.
+const PLACEHOLDER_TEAM_NAMES = Array.from(
+  { length: 25 },
+  (_, index) => `Team ${String(index + 1).padStart(2, '0')}`,
+)
+
+export const DEFAULT_TEAMS: Team[] = PLACEHOLDER_TEAM_NAMES.map(
+  (label, index) => ({
+    id: `team-${String(index + 1).padStart(2, '0')}`,
+    label,
+  }),
+)

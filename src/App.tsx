@@ -1,52 +1,52 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import EntriesPanel from './components/EntriesPanel'
 import ResultDialog from './components/ResultDialog'
+import TeamsPanel from './components/TeamsPanel'
 import Wheel from './components/Wheel'
-import { DEFAULT_ENTRIES, type Entry } from './data/entries'
+import { DEFAULT_TEAMS, MIN_TEAMS, type Team } from './data/teams'
 import './App.css'
 
-const STORAGE_KEY = 'spin-the-wheel:entries:v1'
+const STORAGE_KEY = 'spin-the-wheel:teams:v1'
 const SPIN_FALLBACK_MS = 5200
 
-function loadEntries(): Entry[] {
+function loadTeams(): Team[] {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY)
-    if (!stored) return DEFAULT_ENTRIES
+    if (!stored) return DEFAULT_TEAMS
 
     const parsed: unknown = JSON.parse(stored)
     const valid =
       Array.isArray(parsed) &&
-      parsed.length >= 2 &&
+      parsed.length >= MIN_TEAMS &&
       parsed.every(
         (item) =>
           typeof item === 'object' &&
           item !== null &&
-          typeof (item as Entry).id === 'string' &&
-          typeof (item as Entry).label === 'string',
+          typeof (item as Team).id === 'string' &&
+          typeof (item as Team).label === 'string',
       )
 
-    if (valid) return parsed as Entry[]
+    if (valid) return parsed as Team[]
   } catch {
     // Ignore malformed storage and fall back to the defaults.
   }
 
-  return DEFAULT_ENTRIES
+  return DEFAULT_TEAMS
 }
 
 function App() {
-  const [entries, setEntries] = useState<Entry[]>(loadEntries)
+  const [teams, setTeams] = useState<Team[]>(loadTeams)
   const [rotation, setRotation] = useState(0)
   const [spinning, setSpinning] = useState(false)
-  const [winner, setWinner] = useState<Entry | null>(null)
-  const pendingWinner = useRef<Entry | null>(null)
+  const [winner, setWinner] = useState<Team | null>(null)
+  const pendingWinner = useRef<Team | null>(null)
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(teams))
     } catch {
       // Storage can be unavailable (private mode); the app still works.
     }
-  }, [entries])
+  }, [teams])
 
   const finishSpin = useCallback(() => {
     const result = pendingWinner.current
@@ -55,6 +55,10 @@ function App() {
     pendingWinner.current = null
     setSpinning(false)
     setWinner(result)
+    setTeams((current) => {
+      const remaining = current.filter((team) => team.id !== result.id)
+      return remaining.length > 0 ? remaining : current
+    })
   }, [])
 
   // Safety net in case the transitionend event never arrives (e.g. hidden tab).
@@ -66,20 +70,20 @@ function App() {
   }, [spinning, finishSpin])
 
   const spin = useCallback(() => {
-    if (spinning || entries.length < 2) return
+    if (spinning || teams.length < 2) return
 
-    const index = Math.floor(Math.random() * entries.length)
-    const segment = 360 / entries.length
+    const index = Math.floor(Math.random() * teams.length)
+    const segment = 360 / teams.length
     const center = index * segment - 90 + segment / 2
     const jitterRange = Math.max(segment / 2 - 12, 2)
     const jitter = (Math.random() * 2 - 1) * jitterRange
     const target = -90 - center + jitter
     const delta = (((target - rotation) % 360) + 360) % 360
 
-    pendingWinner.current = entries[index]
+    pendingWinner.current = teams[index]
     setRotation(rotation + 6 * 360 + delta)
     setSpinning(true)
-  }, [entries, rotation, spinning])
+  }, [teams, rotation, spinning])
 
   const spinAgain = useCallback(() => {
     setWinner(null)
@@ -87,6 +91,16 @@ function App() {
   }, [spin])
 
   const closeResult = useCallback(() => setWinner(null), [])
+
+  const startOver = useCallback(() => {
+    pendingWinner.current = null
+    setSpinning(false)
+    setWinner(null)
+    setRotation(0)
+    setTeams(DEFAULT_TEAMS.map((team) => ({ ...team })))
+  }, [])
+
+  const lastTeam = teams.length === 1 ? teams[0] : null
 
   return (
     <div className="app">
@@ -113,13 +127,14 @@ function App() {
               Let the wheel <span className="gradient-text">decide.</span>
             </h1>
             <p className="lede">
-              {entries.length} options, one winner. Edit the list, then give it
-              a spin.
+              {teams.length === 1
+                ? 'One team left standing. Reset to run it back.'
+                : `${teams.length} teams, one winner. Each spin eliminates a team.`}
             </p>
           </div>
 
           <Wheel
-            entries={entries}
+            teams={teams}
             rotation={rotation}
             spinning={spinning}
             onSpin={spin}
@@ -127,9 +142,10 @@ function App() {
           />
         </section>
 
-        <EntriesPanel
-          entries={entries}
-          onChange={setEntries}
+        <TeamsPanel
+          teams={teams}
+          onChange={setTeams}
+          onReset={startOver}
           locked={spinning}
         />
       </main>
@@ -143,8 +159,11 @@ function App() {
       {winner ? (
         <ResultDialog
           winner={winner}
+          remaining={teams.length}
+          lastTeam={lastTeam}
           onClose={closeResult}
           onSpinAgain={spinAgain}
+          onStartOver={startOver}
         />
       ) : null}
     </div>
