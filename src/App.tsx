@@ -122,14 +122,14 @@ function App() {
       <main className="layout">
         <section className="stage">
           <div className="intro">
-            <p className="eyebrow">Decision time</p>
+            <p className="eyebrow">Presentation time</p>
             <h1>
               Let the wheel <span className="gradient-text">decide.</span>
             </h1>
             <p className="lede">
               {teams.length === 1
                 ? 'One team left standing. Reset to run it back.'
-                : `${teams.length} teams, one winner. Each spin eliminates a team.`}
+                : `${teams.length} teams left.`}
             </p>
           </div>
 

@@ -70,7 +70,7 @@ export default function ResultDialog({
           {hasMoreTeams
             ? `${remaining} teams left in the running.`
             : lastTeam
-              ? `${lastTeam.label.trim() || 'One team'} is the last team standing.`
+              ? `${lastTeam.label.trim() || 'One team'} is the last team to present.`
               : 'That was the last team.'}
         </p>
 
