@@ -2,9 +2,9 @@
 
 A NextGen-branded elimination wheel built with Vite, React, and TypeScript.
 
-25 placeholder teams start on the wheel. Every spin picks a winner and removes
-that team from the roster; the last team standing is the champion. The roster is
-saved to `localStorage`, so it survives reloads.
+26 teams start on the wheel. Every spin picks a winner and removes that team
+from the roster; the last team standing is the champion. The roster is saved to
+`localStorage`, so it survives reloads.
 
 ## Quick start
 
@@ -43,8 +43,8 @@ Logo/              Brand logo source files (tracked)
 ## Team roster
 
 Edit team names inline, add up to 32 teams, shuffle the order, or reset to the
-25 placeholders. The default roster lives in `src/data/teams.ts` — swap the
-placeholder labels there for the real team names when they are ready.
+default 26-team roster. The roster lives in `src/data/teams.ts` — edit the
+`DEFAULT_TEAM_NAMES` list there to change it.
 
 ## Brand
 

@@ -47,15 +47,37 @@ export function gradientCss(stops: readonly string[], angle = 135) {
   return `linear-gradient(${angle}deg, ${stops.join(', ')})`
 }
 
-// Placeholder roster — replace these labels with the real team names when ready.
-const PLACEHOLDER_TEAM_NAMES = Array.from(
-  { length: 25 },
-  (_, index) => `Team ${String(index + 1).padStart(2, '0')}`,
-)
+// Default roster — edit this list to change the teams.
+const DEFAULT_TEAM_NAMES = [
+  'LOSERS',
+  'ESPADA',
+  'ETHRIA',
+  'YONKO',
+  'IDEADIGIT',
+  'SPARK',
+  'AMK',
+  'SUPERNOVA',
+  'CUPIDON',
+  'LARPERZ',
+  'TR1NITY',
+  'EL BOARD',
+  'ELIOHO',
+  '2XSIX',
+  'NEWGEN',
+  'SOLVIHA',
+  'VORTEX',
+  'TAWAT',
+  "SALAMANCA'S",
+  'FLUORINE',
+  'HAT TRICK',
+  'THE O(LIVE) TREE',
+  'CREATIVITY TEAM',
+  'TAWATW',
+  'INNOVIX',
+  'ALINNOVTECH',
+]
 
-export const DEFAULT_TEAMS: Team[] = PLACEHOLDER_TEAM_NAMES.map(
-  (label, index) => ({
-    id: `team-${String(index + 1).padStart(2, '0')}`,
-    label,
-  }),
-)
+export const DEFAULT_TEAMS: Team[] = DEFAULT_TEAM_NAMES.map((label, index) => ({
+  id: `team-${String(index + 1).padStart(2, '0')}`,
+  label,
+}))

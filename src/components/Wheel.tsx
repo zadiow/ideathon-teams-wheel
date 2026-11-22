@@ -66,8 +66,9 @@ export default function Wheel({
   const segmentAngle = count > 0 ? 360 / count : 360
   const useRadialLabels = count > 12
   const maxLabelLength =
-    count <= 4 ? 16 : count <= 8 ? 13 : count <= 12 ? 10 : 12
-  const labelSize = count <= 4 ? 8 : count <= 8 ? 6.6 : count <= 12 ? 5.4 : 5.1
+    count <= 4 ? 16 : count <= 8 ? 13 : count <= 12 ? 10 : 16
+  const labelSize =
+    count <= 4 ? 8 : count <= 8 ? 6.6 : count <= 12 ? 5.4 : count <= 20 ? 5.3 : 5
   const labelPadding = Math.min(2.5, segmentAngle * 0.06)
   const canSpin = count >= 2 && !spinning
 

@@ -5,7 +5,7 @@ import Wheel from './components/Wheel'
 import { DEFAULT_TEAMS, MIN_TEAMS, type Team } from './data/teams'
 import './App.css'
 
-const STORAGE_KEY = 'spin-the-wheel:teams:v1'
+const STORAGE_KEY = 'spin-the-wheel:teams:v2'
 const SPIN_FALLBACK_MS = 5200
 
 function loadTeams(): Team[] {
